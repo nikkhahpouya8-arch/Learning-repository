@@ -90,166 +90,99 @@ async def get_user_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(rf"لطفا رده سنی خودتون رو انتخاب کنید:", reply_markup=reply_markup)
 
 
-async def age10_19(Update: Update, context: ContextTypes.DEFAULT_TYPE):
-    age = Update.message.text
-
+async def age10_19(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-
-        [InlineKeyboardButton(
-            text="10"
-        ),
-
+        [
             InlineKeyboardButton(
-            text="11"
-        ),
-
+                text=str(age),
+                callback_data=str(age)
+            )
+            for age in range(10, 15)
+        ],
+        [
             InlineKeyboardButton(
-            text="12"
-        ),
-
-            InlineKeyboardButton(
-            text="13"
-        ),
-
-            InlineKeyboardButton(
-            text="14"
-        )],
-
-        [InlineKeyboardButton(
-            text="15"
-        ),
-
-            InlineKeyboardButton(
-            text="16"
-        ),
-
-            InlineKeyboardButton(
-            text="17"
-        ),
-
-            InlineKeyboardButton(
-            text="18"
-        ),
-
-            InlineKeyboardButton(
-            text="19"
-        )]
-
+                text=str(age),
+                callback_data=str(age)
+            )
+            for age in range(15, 20)
+        ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await Update.message.reply_text(rf"سن دقیق خودتون رو انتخاب کنید:", reply_markup=reply_markup)
+    await update.message.reply_text(
+        "سن دقیق خودتون رو انتخاب کنید:",
+        reply_markup=reply_markup
+    )
 
     return ConversationHandler.END
 
 
-async def age20_29(Update: Update, context: ContextTypes.DEFAULT_TYPE):
-    age = Update.message.text
-
+async def age20_29(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-
-        [InlineKeyboardButton(
-            text="20"
-        ),
-
+        [
             InlineKeyboardButton(
-            text="21"
-        ),
-
+                text=str(age),
+                callback_data=str(age)
+            )
+            for age in range(20, 25)
+        ],
+        [
             InlineKeyboardButton(
-            text="22"
-        ),
-
-            InlineKeyboardButton(
-            text="23"
-        ),
-
-            InlineKeyboardButton(
-            text="24"
-        )],
-
-        [InlineKeyboardButton(
-            text="25"
-        ),
-
-            InlineKeyboardButton(
-            text="26"
-        ),
-
-            InlineKeyboardButton(
-            text="27"
-        ),
-
-            InlineKeyboardButton(
-            text="28"
-        ),
-
-            InlineKeyboardButton(
-            text="29"
-        )]
-
+                text=str(age),
+                callback_data=str(age)
+            )
+            for age in range(25, 30)
+        ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await Update.message.reply_text(rf"سن دقیق خودتون رو انتخاب کنید:", reply_markup=reply_markup)
+    await update.message.reply_text(
+        "سن دقیق خودتون رو انتخاب کنید:",
+        reply_markup=reply_markup
+    )
 
     return ConversationHandler.END
 
 
-async def age30_39(Update: Update, context: ContextTypes.DEFAULT_TYPE):
-    age = Update.message.text
-
+async def age30_39(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-
-        [InlineKeyboardButton(
-            text="30"
-        ),
-
+        [
             InlineKeyboardButton(
-            text="31"
-        ),
-
+                text=str(age),
+                callback_data=str(age)
+            )
+            for age in range(30, 35)
+        ],
+        [
             InlineKeyboardButton(
-            text="32"
-        ),
-
-            InlineKeyboardButton(
-            text="33"
-        ),
-
-            InlineKeyboardButton(
-            text="34"
-        )],
-
-        [InlineKeyboardButton(
-            text="35"
-        ),
-
-            InlineKeyboardButton(
-            text="36"
-        ),
-
-            InlineKeyboardButton(
-            text="37"
-        ),
-
-            InlineKeyboardButton(
-            text="38"
-        ),
-
-            InlineKeyboardButton(
-            text="39"
-        )]
-
+                text=str(age),
+                callback_data=str(age)
+            )
+            for age in range(35, 40)
+        ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await Update.message.reply_text(rf"سن دقیق خودتون رو انتخاب کنید:", reply_markup=reply_markup)
+    await update.message.reply_text(
+        "سن دقیق خودتون رو انتخاب کنید:",
+        reply_markup=reply_markup
+    )
 
     return ConversationHandler.END
+
+
+async def handle_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    age = int(query.data)
+
+    await query.edit_message_text(
+        f"سن انتخاب‌شده: {age}"
+    )
 
 
 async def support(Update: Update, context: ContextTypes.DEFAULT_TYPE):
