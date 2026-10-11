@@ -73,15 +73,18 @@ async def get_user_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Keyboard = [
 
         [InlineKeyboardButton(
-            text="10-19"
+            text="10-19",
+            callback_data="10-19"
         ),
 
             InlineKeyboardButton(
-            text="20-29"
+            text="20-29",
+            callback_data="20-29"
         ),
 
             InlineKeyboardButton(
-            text="30-39"
+            text="30-39",
+            callback_data="30-39"
         )]
 
     ]
@@ -90,7 +93,22 @@ async def get_user_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(rf"لطفا رده سنی خودتون رو انتخاب کنید:", reply_markup=reply_markup)
 
 
+async def user_age_handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = update.callback_query.data
+    print(data)
+
+    if data == "10-19":
+        await age10_19(update, context)
+
+    elif data == "20-29":
+        await age20_29(update, context)
+
+    elif data == "30-39":
+        await age30_39(update, context)
+
+
 async def age10_19(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(1)
     keyboard = [
         [
             InlineKeyboardButton(
@@ -201,15 +219,16 @@ async def support(Update: Update, context: ContextTypes.DEFAULT_TYPE):
                                     reply_markup=reply_markup)
 
 
-# async def message_support(Update: Update, Context: ContextTypes.DEFAULT_TYPE):
+async def message_support(Update: Update, Context: ContextTypes.DEFAULT_TYPE):
 
-#     query = Update.callback_query
+    query = Update.callback_query
 
-#     await query.answer
+    await query.answer
 
-#     await query.edit_message_text(text="درحال انتقال به پیوی پشتیبان...")
+    await query.edit_message_text(text="درحال انتقال به پیوی پشتیبان...")
 
-async def city_handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     logging.info(f"logging callbackquery: {update.callback_query.data}")\
 
@@ -257,7 +276,7 @@ def main():
     )
 
     application.add_handler(
-        CallbackQueryHandler(city_handler_helper)
+        CallbackQueryHandler(handler_helper)
     )
 
     application.add_handler(
@@ -273,10 +292,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-def test_keyboard():
-    Keyboard = []
-    nums = list(range(10, 20))
-    for x in nums:
-        pass
