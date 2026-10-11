@@ -2,13 +2,13 @@ from telegram import Update, InlineKeyboardButton, ReplyKeyboardMarkup, Keyboard
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ConversationHandler
 from Test_Database import add_user_info
 import logging
-
+from decouple import Config
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-BOT_TOKEN = "8936754159:AAGw7kGHjxLH4oSi0ui29CPBTLgqrtzsPLM"
+BOT_TOKEN = Config("BOT_TOKEN")
 
 
 def start_menu():
