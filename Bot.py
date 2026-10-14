@@ -2,13 +2,13 @@ from telegram import Update, InlineKeyboardButton, ReplyKeyboardMarkup, Keyboard
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ConversationHandler
 from Test_Database import add_user_info
 import logging
-from decouple import Config
+from decouple import config
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-BOT_TOKEN = Config("BOT_TOKEN")
+BOT_TOKEN = config("BOT_TOKEN")
 
 
 def start_menu():
@@ -112,8 +112,8 @@ async def age10_19(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
             InlineKeyboardButton(
-                text=str(age),
-                callback_data=str(age)
+                text=int(age),
+                callback_data=int(age)
             )
             for age in range(10, 15)
         ],
@@ -192,15 +192,29 @@ async def age30_39(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-async def handle_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+async def get_age_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = update.callback_query.data
 
-    age = int(query.data)
+    ages = [(10, 20), (20, 30), (30, 40)]
 
-    await query.edit_message_text(
-        f"سن انتخاب‌شده: {age}"
-    )
+    keyboard = []
+
+    for start, end in ages:
+
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text=str(f'{start},{end}'),
+                    callback_data=f"age_range({start}, {end})"
+                )
+            ]
+        )
+
+    print(1)
+    print(keyboard)
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.callback_query.message.reply_text(rf"بازه سن خود را انتخاب کنید", reply_markup=reply_markup)
 
 
 async def support(Update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -239,7 +253,7 @@ async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await get_user_city(update, context)
 
     elif Data == "سن":
-        await get_user_age(update, context)
+        await get_age_range(update, context)
 
 
 def main():
