@@ -93,105 +93,6 @@ async def get_user_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(rf"لطفا رده سنی خودتون رو انتخاب کنید:", reply_markup=reply_markup)
 
 
-async def user_age_handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = update.callback_query.data
-    print(data)
-
-    if data == "10-19":
-        await age10_19(update, context)
-
-    elif data == "20-29":
-        await age20_29(update, context)
-
-    elif data == "30-39":
-        await age30_39(update, context)
-
-
-async def age10_19(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(1)
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                text=int(age),
-                callback_data=int(age)
-            )
-            for age in range(10, 15)
-        ],
-        [
-            InlineKeyboardButton(
-                text=str(age),
-                callback_data=str(age)
-            )
-            for age in range(15, 20)
-        ]
-    ]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        "سن دقیق خودتون رو انتخاب کنید:",
-        reply_markup=reply_markup
-    )
-
-    return ConversationHandler.END
-
-
-async def age20_29(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                text=str(age),
-                callback_data=str(age)
-            )
-            for age in range(20, 25)
-        ],
-        [
-            InlineKeyboardButton(
-                text=str(age),
-                callback_data=str(age)
-            )
-            for age in range(25, 30)
-        ]
-    ]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        "سن دقیق خودتون رو انتخاب کنید:",
-        reply_markup=reply_markup
-    )
-
-    return ConversationHandler.END
-
-
-async def age30_39(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                text=str(age),
-                callback_data=str(age)
-            )
-            for age in range(30, 35)
-        ],
-        [
-            InlineKeyboardButton(
-                text=str(age),
-                callback_data=str(age)
-            )
-            for age in range(35, 40)
-        ]
-    ]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        "سن دقیق خودتون رو انتخاب کنید:",
-        reply_markup=reply_markup
-    )
-
-    return ConversationHandler.END
-
-
 async def get_age_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = update.callback_query.data
 
@@ -205,7 +106,7 @@ async def get_age_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 InlineKeyboardButton(
                     text=str(f'{start},{end}'),
-                    callback_data=f"age_range({start}, {end})"
+                    callback_data=f"age_range:{start}:{end}"
                 )
             ]
         )
@@ -215,6 +116,42 @@ async def get_age_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.callback_query.message.reply_text(rf"بازه سن خود را انتخاب کنید", reply_markup=reply_markup)
+
+
+async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    data = update.callback_query.data
+
+    print(data)
+
+    age_range = data.split(":")
+
+    start = int(age_range[1])
+
+    end = int(age_range[2]) + 1
+
+    keyboard = []
+
+    for age in range(start, end):
+
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text=str(f'{age}'),
+                    callback_data=f'exact_age:{age}'
+                )
+            ]
+        )
+
+        if age != end:
+            age += 1
+            continue
+        elif age == end:
+            break
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.callback_query.message.reply_text(rf"سن دقیق خود را انتخاب کنید:", reply_markup=reply_markup)
 
 
 async def support(Update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -255,6 +192,15 @@ async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif Data == "سن":
         await get_age_range(update, context)
 
+    elif Data.startswith("age_range"):
+        await get_age(update, context)
+
+    elif Data.startswith("exact_age"):
+
+        Data_split = Data.split(":")
+        age = Data_split[1]
+        await update.callback_query.message.reply_text(f"سن شما {age} سال میباشد")
+
 
 def main():
     application = (
@@ -273,33 +219,9 @@ def main():
         MessageHandler(filters.Text("تکمیل اطلاعات"), fill_info)
     )
 
-    # application.add_handler(
-    #     CallbackQueryHandler(get_user_city)
-    # )
-
-    # application.add_handler(
-    #     CallbackQueryHandler(get_user_age)
-    # )
-
-    application.add_handler(
-        MessageHandler(filters.Regex("10-19"), age10_19)
-    )
-
-    application.add_handler(
-        MessageHandler(filters.Regex("20-29"), age20_29)
-    )
-
     application.add_handler(
         CallbackQueryHandler(handler_helper)
     )
-
-    application.add_handler(
-        MessageHandler(filters.Regex("30-39"), age30_39)
-    )
-
-    # application.add_handler(
-    #     CallbackQueryHandler(message_support)
-    # )
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
