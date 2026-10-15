@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, ForceReply
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ConversationHandler
-from Test_Database import add_user_info
+from Test_Database import add_user_info, add_user_age, add_user_city
 import logging
 from decouple import config
 logging.basicConfig(
@@ -30,21 +30,38 @@ def start_menu():
     )
 
 
-async def start(Update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    user = Update.effective_user
+    user = update.effective_user
 
-    await Update.message.reply_html(text=f"سلام {user.mention_html(name=user.username)}! خوش اومدی.")
+    username = update.effective_user.username
+    id = update.effective_user.id
 
-    await Update.message.reply_text("با کلیک کردن گزینه های زیر میتونید به پشتیبان پیام بدید و یا اطلاعات خودتون رو تکمیل کنید.", reply_markup=start_menu())
+    add_user_info(id, username)
+    print("User info added to the database!")
+
+    await update.message.reply_html(text=f"سلام {user.mention_html(name=user.username)}! خوش اومدی.")
+
+    await update.message.reply_text("با کلیک کردن گزینه های زیر میتونید به پشتیبان پیام بدید و یا اطلاعات خودتون رو تکمیل کنید.", reply_markup=start_menu())
 
 
 async def get_user_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(4)
-    # city = Update.message.text
     await update.callback_query.message.reply_text("لطفا اسم شهر خود را به فارسی تایپ کنید:")
     print(5)
+
+
+async def user_city_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    city = update.message.text
+    id = update.effective_user.id
+
+    add_user_city(id, city)
+
+    print("User city added!")
+
+    await update.message.reply_text(f"شهر شما ({city}) با موفقیت ثبت شد!")
 
 
 async def fill_info(Update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -196,9 +213,12 @@ async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await get_age(update, context)
 
     elif Data.startswith("exact_age"):
-
+        id = update.effective_user.id
         Data_split = Data.split(":")
         age = Data_split[1]
+
+        add_user_age(id, age)
+        print("User age added!")
         await update.callback_query.message.reply_text(f"سن شما {age} سال میباشد")
 
 
@@ -218,6 +238,9 @@ def main():
     application.add_handler(
         MessageHandler(filters.Text("تکمیل اطلاعات"), fill_info)
     )
+
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, user_city_helper))
 
     application.add_handler(
         CallbackQueryHandler(handler_helper)
