@@ -16,10 +16,26 @@ cursor.execute("""
                """)
 
 
-def add_user_info(telegram_id, username, city, age):
+def add_user_info(telegram_id, username):
 
     cursor.execute("""
-                   INSERT INTO users(telegram_id, username, city, age)
-                   VALUES(?,?,?,?)
-                   """, (telegram_id, username, city, age))
+                   INSERT INTO users(telegram_id, username)
+                   VALUES(?,?)
+                   """, (telegram_id, username))
+    connection.commit()
+
+def add_user_city(telegram_id, city):
+    cursor.execute("""
+                   UPDATE users
+                   SET city = ?
+                   WHERE telegram_id = ?
+                   """, (telegram_id, city))
+    connection.commit()
+    
+def add_user_age(telegram_id, age):
+    cursor.execute("""
+                   UPDATE users
+                   SET age = ?
+                   WHERE telegram_id = ?
+                   """, (telegram_id, age))
     connection.commit()
