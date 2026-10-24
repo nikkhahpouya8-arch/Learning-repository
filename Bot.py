@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, ForceReply
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ConversationHandler
-from Test_Database import add_user_info, add_user_age, add_user_city
+from Test_Database import add_user_info, add_user_age, add_user_city, get_user_info, show_all_users
 import logging
 from decouple import config
 logging.basicConfig(
@@ -21,6 +21,11 @@ def start_menu():
         [
             KeyboardButton(
                 "پشتیبانی"
+            )
+        ],
+        [
+            KeyboardButton(
+                "دریافت اطلاعات"
             )
         ]
     ]
@@ -45,6 +50,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("با کلیک کردن گزینه های زیر میتونید به پشتیبان پیام بدید و یا اطلاعات خودتون رو تکمیل کنید.", reply_markup=start_menu())
 
 
+async def show_user_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    id = update.effective_user.id
+
+    user_info = get_user_info(id)
+
+    message = (
+        "پروفایل شما حاوی اطلاعات زیر است:\n"
+        f"نام کاربری: {user_info['username']}\n"
+        f"آیدی عددی: {user_info['telegram_id']}\n"
+        f"سن شما: {user_info['age']}\n"
+        f"شهر شما: {user_info['city']}\n"
+    )
+
+    await update.message.reply_text(message)
+
+
 async def get_user_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(4)
@@ -57,6 +79,7 @@ async def user_city_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = update.message.text
     id = update.effective_user.id
 
+    show_all_users()
     add_user_city(id, city)
 
     print("User city added!")
@@ -237,6 +260,10 @@ def main():
 
     application.add_handler(
         MessageHandler(filters.Text("تکمیل اطلاعات"), fill_info)
+    )
+
+    application.add_handler(
+        MessageHandler(filters.Text("دریافت اطلاعات"), show_user_info)
     )
 
     application.add_handler(
