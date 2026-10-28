@@ -2,7 +2,7 @@ import sqlite3
 
 
 connection = sqlite3.connect("TestBot.db")
-
+connection.row_factory = sqlite3.Row
 cursor = connection.cursor()
 
 cursor.execute("""
@@ -24,6 +24,7 @@ def add_user_info(telegram_id, username):
                    """, (telegram_id, username))
     connection.commit()
 
+
 def add_user_city(telegram_id, city):
     cursor.execute("""
                    UPDATE users
@@ -31,7 +32,8 @@ def add_user_city(telegram_id, city):
                    WHERE telegram_id = ?
                    """, (telegram_id, city))
     connection.commit()
-    
+
+
 def add_user_age(telegram_id, age):
     cursor.execute("""
                    UPDATE users
@@ -39,3 +41,12 @@ def add_user_age(telegram_id, age):
                    WHERE telegram_id = ?
                    """, (telegram_id, age))
     connection.commit()
+
+
+def get_user_info(telegram_id):
+    cursor.execute("""
+                       SELECT * FROM users
+                       WHERE telegram_id = ?
+                       """, (telegram_id,))
+
+    return cursor.fetchone()
