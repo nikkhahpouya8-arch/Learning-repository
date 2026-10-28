@@ -1,6 +1,6 @@
 from telegram import Update, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, ForceReply
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ConversationHandler
-from Test_Database import add_user_info, add_user_age, add_user_city, get_user_info, show_all_users
+from Test_Database import add_user_info, add_user_age, add_user_city, get_user_info
 import logging
 from decouple import config
 logging.basicConfig(
@@ -79,7 +79,6 @@ async def user_city_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = update.message.text
     id = update.effective_user.id
 
-    show_all_users()
     add_user_city(id, city)
 
     print("User city added!")
