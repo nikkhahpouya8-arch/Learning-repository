@@ -68,13 +68,15 @@ async def show_user_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def get_user_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
+    context.user_data["awaiting_city"] = True
     print(4)
     await update.callback_query.message.reply_text("لطفا اسم شهر خود را به فارسی تایپ کنید:")
     print(5)
 
 
 async def user_city_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data.get("awaiting_city"):
+        return
 
     city = update.message.text
     id = update.effective_user.id
@@ -84,6 +86,7 @@ async def user_city_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("User city added!")
 
     await update.message.reply_text(f"شهر شما ({city}) با موفقیت ثبت شد!")
+    context.user_data["awaiting_city"] = False
 
 
 async def fill_info(Update: Update, context: ContextTypes.DEFAULT_TYPE):
