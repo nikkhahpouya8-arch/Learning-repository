@@ -3,6 +3,8 @@ from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandl
 from Test_Database import add_user_info, add_user_age, add_user_city, get_user_info
 import logging
 from decouple import config
+from weather_API import get_weather_status
+
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
@@ -26,6 +28,11 @@ def start_menu():
         [
             KeyboardButton(
                 "دریافت اطلاعات"
+            )
+        ],
+        [
+            KeyboardButton(
+                "وضعیت آب و هوا"
             )
         ]
     ]
@@ -70,7 +77,7 @@ async def show_user_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_user_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["awaiting_city"] = True
     print(4)
-    await update.callback_query.message.reply_text("لطفا اسم شهر خود را به فارسی تایپ کنید:")
+    await update.callback_query.message.reply_text("لطفا اسم شهر خود را به انگلیسی تایپ کنید:")
     print(5)
 
 
@@ -196,6 +203,61 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(rf"سن دقیق خود را انتخاب کنید:", reply_markup=reply_markup)
 
 
+async def weather_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    id = update.effective_user.id
+    user_info = get_user_info(id)
+
+    user_city = user_info['city']
+
+    current_status = get_weather_status(user_city)
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                text="شهر دیگر",
+                callback_data="other_city"
+            )
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    Message = (
+        f"وضعیت آب و هوای شهر {user_city}:\n"
+        f"{current_status}\n"
+        f"برای دیدن وضعیت آب و هوای شهر دیگر روی دکمه ی زیر کلیک کنید."
+    )
+    if current_status is not None:
+        await update.message.reply_text(Message, reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(rf"وضعیت آب و هوای شهر مورد نظر یافت نشد!")
+
+
+async def other_city_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["awaiting_choice"] = True
+
+    await update.callback_query.message.reply_text("لطفا اسم شهر موردنظر خود را به انگلیسی تایپ کنید:")
+
+
+async def other_city_weather_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data.get("awaiting_choice"):
+        return
+
+    chosen_city = update.message.text
+
+    current_status = get_weather_status(chosen_city)
+
+    Message = (
+        f"وضعیت آب و هوای شهر {chosen_city}:\n"
+        f"{current_status}\n"
+        f"برای دیدن وضعیت آب و هوای شهر دیگر روی دکمه ی زیر کلیک کنید."
+    )
+    if current_status is not None:
+        await update.message.reply_text(Message)
+    else:
+        await update.message.reply_text(rf"وضعیت آب و هوای شهر مورد نظر یافت نشد!")
+
+
 async def support(Update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     Keyboard = [
@@ -245,6 +307,8 @@ async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         add_user_age(id, age)
         print("User age added!")
         await update.callback_query.message.reply_text(f"سن شما {age} سال میباشد")
+    elif Data == "other_city":
+        await other_city_weather(update, context)
 
 
 def main():
@@ -269,7 +333,14 @@ def main():
     )
 
     application.add_handler(
+        MessageHandler(filters.Text("وضعیت آب و هوا"), weather_menu)
+    )
+
+    application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, user_city_helper))
+
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, other_city_weather_helper))
 
     application.add_handler(
         CallbackQueryHandler(handler_helper)

@@ -33,7 +33,6 @@ def add_user_info(telegram_id, username):
         return
 
 
-
 def add_user_city(telegram_id, city):
 
     print("ID recieved by add_user_city:", telegram_id)
@@ -80,3 +79,4 @@ def get_user_info(telegram_id):
                        """, (telegram_id,))
 
     return cursor.fetchone()
+
