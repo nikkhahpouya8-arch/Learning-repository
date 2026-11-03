@@ -227,7 +227,7 @@ async def weather_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"{current_status}\n"
         f"برای دیدن وضعیت آب و هوای شهر دیگر روی دکمه ی زیر کلیک کنید."
     )
-    if current_status is not None:
+    if current_status:
         await update.message.reply_text(Message, reply_markup=reply_markup)
     else:
         await update.message.reply_text(rf"وضعیت آب و هوای شهر مورد نظر یافت نشد!")
@@ -240,6 +240,8 @@ async def other_city_weather(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def other_city_weather_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    print(33333333333333)
     if not context.user_data.get("awaiting_choice"):
         return
 
@@ -247,13 +249,15 @@ async def other_city_weather_helper(update: Update, context: ContextTypes.DEFAUL
 
     current_status = get_weather_status(chosen_city)
 
-    Message = (
+    message = (
         f"وضعیت آب و هوای شهر {chosen_city}:\n"
         f"{current_status}\n"
         f"برای دیدن وضعیت آب و هوای شهر دیگر روی دکمه ی زیر کلیک کنید."
     )
-    if current_status is not None:
-        await update.message.reply_text(Message)
+    print(2222222222222222222222222222222)
+    print(current_status)
+    if current_status != False:
+        await update.message.reply_text(message)
     else:
         await update.message.reply_text(rf"وضعیت آب و هوای شهر مورد نظر یافت نشد!")
 
