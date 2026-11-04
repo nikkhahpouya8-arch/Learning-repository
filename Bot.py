@@ -252,7 +252,6 @@ async def other_city_weather_helper(update: Update, context: ContextTypes.DEFAUL
     message = (
         f"وضعیت آب و هوای شهر {chosen_city}:\n"
         f"{current_status}\n"
-        f"برای دیدن وضعیت آب و هوای شهر دیگر روی دکمه ی زیر کلیک کنید."
     )
     print(2222222222222222222222222222222)
     print(current_status)
@@ -315,6 +314,13 @@ async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await other_city_weather(update, context)
 
 
+async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if context.user_data.get("awaiting_choice"):
+        await other_city_weather_helper(update, context)
+    elif context.user_data.get("awaiting_city"):
+        await user_city_helper(update, context)
+
+
 def main():
     application = (
         Application.builder().token(BOT_TOKEN).build()
@@ -341,10 +347,10 @@ def main():
     )
 
     application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, user_city_helper))
+        MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
 
     application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, other_city_weather_helper))
+        MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
 
     application.add_handler(
         CallbackQueryHandler(handler_helper)
