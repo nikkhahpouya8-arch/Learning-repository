@@ -241,7 +241,6 @@ async def other_city_weather(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def other_city_weather_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    print(33333333333333)
     if not context.user_data.get("awaiting_choice"):
         return
 
@@ -253,8 +252,7 @@ async def other_city_weather_helper(update: Update, context: ContextTypes.DEFAUL
         f"وضعیت آب و هوای شهر {chosen_city}:\n"
         f"{current_status}\n"
     )
-    print(2222222222222222222222222222222)
-    print(current_status)
+
     if current_status != False:
         await update.message.reply_text(message)
     else:
@@ -291,7 +289,6 @@ async def handler_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"logging callbackquery: {update.callback_query.data}")\
 
     Data = update.callback_query.data
-    print(Data)
 
     if Data == "شهر":
         await get_user_city(update, context)
