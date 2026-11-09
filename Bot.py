@@ -102,13 +102,15 @@ async def fill_info(Update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         [InlineKeyboardButton(
             text="سن",
-            callback_data="سن"
+            callback_data="سن",
+            style="primary"
         ),
 
 
             InlineKeyboardButton(
             text="شهر",
-            callback_data="شهر"
+            callback_data="شهر",
+            style="primary"
         )]
 
     ]
@@ -215,7 +217,8 @@ async def weather_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton(
                 text="شهر دیگر",
-                callback_data="other_city"
+                callback_data="other_city",
+                style="primary"
             )
         ]
     ]
