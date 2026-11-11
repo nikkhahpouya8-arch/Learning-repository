@@ -4,6 +4,8 @@ from Test_Database import add_user_info, add_user_age, add_user_city, get_user_i
 import logging
 from decouple import config
 from weather_API import get_weather_status
+import datetime
+
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
