@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandl
 from Test_Database import add_user_info, add_user_age, add_user_city, get_user_info
 import logging
 from decouple import config
-from weather_API import get_weather_status
+from API.weather_API import get_weather_status
 import datetime
 
 
