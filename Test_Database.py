@@ -165,3 +165,21 @@ def edit_reminder(reminder_id, user_id, title, description, reminder_time):
                    AND user_id = ?
                    """, (title, description, reminder_time, reminder_id, user_id))
     connection.commit()
+
+def get_telegram_id(user_id):
+    cursor.execute("""
+                   SELECT telegram_id FROM users
+                   WHERE id = ?
+                   """, (user_id,))
+    row = cursor.fetchone()
+    
+    return row['telegram_id'] if row else None
+
+def get_reminder_by_id(reminder_id):
+    cursor.execute("""
+                   SELECT * FROM reminders
+                   WHERE id = ?
+                   """, (reminder_id,))
+    reminder = cursor.fetchone()
+    
+    return reminder
