@@ -135,7 +135,12 @@ def add_reminder(user_id, title, description, reminder_time):
                    INSERT INTO reminders(user_id, title, description, reminder_time)
                    VALUES(?,?,?,?)
                    """, (user_id, title, description, reminder_time))
+    
+    reminder_id = cursor.lastrowid
+    
     connection.commit()
+    
+    return reminder_id
 
 
 def get_user_reminders(user_id):
@@ -152,7 +157,12 @@ def delete_reminder(reminder_id, user_id):
                    WHERE id = ?
                    AND user_id = ?
                    """, (reminder_id, user_id))
+    
+    result = cursor.rowcount
+    
     connection.commit()
+    
+    return result
 
 
 def edit_reminder(reminder_id, user_id, title, description, reminder_time):
@@ -164,7 +174,12 @@ def edit_reminder(reminder_id, user_id, title, description, reminder_time):
                    WHERE id = ?
                    AND user_id = ?
                    """, (title, description, reminder_time, reminder_id, user_id))
+    
+    result = cursor.rowcount
+    
     connection.commit()
+    
+    return result
 
 def get_telegram_id(user_id):
     cursor.execute("""
@@ -183,3 +198,24 @@ def get_reminder_by_id(reminder_id):
     reminder = cursor.fetchone()
     
     return reminder
+
+def update_reminder_task_ids(reminder_id, early_task_id, final_task_id):
+    cursor.execute("""
+                   UPDATE reminders
+                   SET early_task_id = ?,
+                    final_task_id = ?
+                   WHERE id = ?
+                   """, (early_task_id, final_task_id, reminder_id))
+    connection.commit()
+
+def delete_failed_reminder(reminder_id):
+    cursor.execute("""
+                   DELETE from reminders
+                   WHERE id = ?
+                   """, (reminder_id,))
+    
+    result = cursor.rowcount
+    
+    connection.commit()
+    
+    return result
