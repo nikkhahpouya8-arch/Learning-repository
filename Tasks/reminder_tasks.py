@@ -22,6 +22,7 @@ def send_early_notification(reminder_id):
     else:
         return "User not found!"
 
+
 @app.task
 def send_final_notification(reminder_id):
 
@@ -30,7 +31,7 @@ def send_final_notification(reminder_id):
     if reminder is None:
         return "Task not found!"
 
-    notification = f"It's time!\n\nReminder title: {reminder['title']}"
+    notification = f"It's time!\n\nReminder title: {reminder['title']}\n\nReminder description: {reminder['description']}"
 
     telegram_id = get_telegram_id(reminder['user_id'])
 

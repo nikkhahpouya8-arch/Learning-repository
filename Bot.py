@@ -8,6 +8,8 @@ from API.weather_API import get_weather_status
 import datetime
 import jdatetime
 
+TITLE, DESCRIPTION, DATE, TIME, CONFIRM = range(5)
+
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
@@ -342,8 +344,14 @@ async def show_reminders(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 description = details['description']
 
-            gregorian_time = datetime.datetime.strptime(
-                details['reminder_time'], "%d/%m/%Y %H:%M")
+            try:
+                gregorian_time = datetime.datetime.strptime(
+                    details['reminder_time'], "%Y-%m-%d %H:%M:%S"
+                )
+            except ValueError:
+                gregorian_time = datetime.datetime.strptime(
+                    details['reminder_time'], "%d/%m/%Y %H:%M"
+                )
 
             jalali_time = jdatetime.datetime.fromgregorian(
                 datetime=gregorian_time)
@@ -422,62 +430,73 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif context.user_data.get("awaiting_city"):
         await user_city_helper(update, context)
 
+
+async def start_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await update.message.reply_text("عنوان یادآور خود را بنویسید:")
+
+    return TITLE
+
+
 async def get_title(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
     title = update.message.text
-    
+
     context.user_data["title"] = title
-    
+
     await update.message.reply_text("توضیحات یادآور خود را بنویسید:")
-    
+
     return DESCRIPTION
 
+
 async def get_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
     description = update.message.text
-    
+
     context.user_data["description"] = description
-    
+
     await update.message.reply_text("تاریخ یادآور خود را تعیین کنید\n\nمثلا 1405/8/28")
-    
+
     return DATE
 
+
 async def get_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
     date = update.message.text
-    
+
     jalali_date = jdatetime.datetime.strptime(date, "%Y/%m/%d")
-    
+
     context.user_data["date"] = jalali_date
-    
+
     await update.message.reply_text("ساعت یادآور خود را تعیین کنید:\n\nمثلا 20:45")
-    
+
     return TIME
 
+
 async def get_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
     recieved_time = update.message.text
-    
+
     parsed_time = datetime.datetime.strptime(recieved_time, "%H:%M").time()
-    
+
     context.user_data["time"] = parsed_time
-    
+
     title = context.user_data["title"]
-    description = context.user_data["description"] or "بدون توضیحات."
+    description = context.user_data["description"]
     date = context.user_data["date"]
     time = context.user_data["time"]
-    
+
     formatted_date = date.strftime("%Y/%m/%d")
     formatted_time = time.strftime("%H:%M")
-    
+
     message = (
-    f"عنوان: {title}\n"
-    f"توضیحات: {description}\n"
-    f"تاریخ: {formatted_date}\n"
-    f"ساعت: {formatted_time}\n\n"
-    "آیا اطلاعات مورد تأیید شماست؟"
+        f"عنوان: {title}\n"
+        f"توضیحات: {description}\n"
+        f"تاریخ: {formatted_date}\n"
+        f"ساعت: {formatted_time}\n\n"
+        "آیا اطلاعات مورد تأیید شماست؟"
     )
-    
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -494,39 +513,29 @@ async def get_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         ]
     ]
-    
+
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
+
     await update.message.reply_text(
         message,
         reply_markup=reply_markup
     )
-    
+
     return CONFIRM
 
+
 async def confirm_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
     query = update.callback_query
     await query.answer()
-    
+
     answer = query.data
-    
-    date = context.user_data["date"]
-    time = context.user_data["time"]
-    
-    jalali_datetime = jdatetime.datetime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute
-    )
-    
+
     if answer == "confirmed":
-        
+
         date = context.user_data["date"]
         time = context.user_data["time"]
-        
+
         jalali_datetime = jdatetime.datetime(
             date.year,
             date.month,
@@ -534,9 +543,9 @@ async def confirm_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
             time.hour,
             time.minute
         )
-        
+
         gregorian_time = jalali_datetime.togregorian()
-        
+
         title = context.user_data["title"]
         description = context.user_data["description"]
         user_id = update.effective_user.id
@@ -544,23 +553,57 @@ async def confirm_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_info = get_user_info(user_id)
 
         internal_id = user_info['id']
-        
-        result = schedule_reminder(internal_id, title, description, gregorian_time)
-        
+
+        result = schedule_reminder(
+            internal_id, title, description, gregorian_time)
+
         if result == "All done":
             await query.message.reply_text('ثبت یادآور شما تایید شد.')
         elif result == "Past time":
             await query.message.reply_text('زمان تعیین شده گذشته است!')
         else:
             await query.message.reply_text('ثبت یادآور با مشکل مواجه شد!')
-        
+
     elif answer == "cancel":
         await query.message.reply_text('ثبت یادآور شما لغو شد.')
+
+    context.user_data.clear()
+    return ConversationHandler.END
+
+
+async def cancel_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    context.user_data.clear()
+
+    await update.message.reply_text("ثبت یادآور لغو شد.")
+
+    return ConversationHandler.END
+
 
 def main():
     application = (
         Application.builder().token(BOT_TOKEN).build()
     )
+
+    reminder_conversation = ConversationHandler(
+        entry_points=[
+            MessageHandler(
+                filters.Regex("^➕ افزودن یادآوری$"), start_reminder
+            )
+        ],
+        states={
+            TITLE: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_title)],
+            DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_description)],
+            DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_date)],
+            TIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_time)],
+            CONFIRM: [CallbackQueryHandler(confirm_reminder)]
+        },
+        fallbacks=[
+            CommandHandler("cancel", cancel_reminder)
+        ]
+    )
+
+    application.add_handler(reminder_conversation)
 
     application.add_handler(
         CommandHandler("start", start)
@@ -583,7 +626,7 @@ def main():
     )
 
     application.add_handler(
-        MessageHandler(filters.TEXT("🗒️ مشاهده یادآوری ها"), show_reminders)
+        MessageHandler(filters.Text("🗒️ مشاهده یادآوری ها"), show_reminders)
     )
 
     application.add_handler(
@@ -591,7 +634,7 @@ def main():
     )
 
     application.add_handler(
-        MessageHandler(filters.TEXT("🔙 بازگشت به منوی اصلی"), start)
+        MessageHandler(filters.Text("🔙 بازگشت به منوی اصلی"), start)
     )
 
     application.add_handler(

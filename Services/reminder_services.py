@@ -10,6 +10,7 @@ from Test_Database import (
 from Tasks.reminder_tasks import send_early_notification, send_final_notification
 from Celery.celery_app import app
 import datetime
+from zoneinfo import ZoneInfo
 
 
 def schedule_reminder(user_id, title, description, reminder_time):
@@ -49,14 +50,18 @@ def schedule_notifications(reminder_id, reminder_time):
             if early_time >= datetime.datetime.now():
                 early_task_id = send_early_notification.apply_async(
                     args=[reminder_id],
-                    eta=early_time
+                    eta=early_time.replace(tzinfo=ZoneInfo("Asia/Tehran"))
                 ).id
             else:
                 early_task_id = None
 
+            tehran_time = reminder_time.replace(
+                tzinfo=ZoneInfo("Asia/Tehran")
+            )
+
             final_task_id = send_final_notification.apply_async(
                 args=[reminder_id],
-                eta=reminder_time
+                eta=tehran_time
             ).id
 
             update_reminder_task_ids(reminder_id, early_task_id, final_task_id)

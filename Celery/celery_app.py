@@ -4,6 +4,9 @@ import datetime
 app = Celery("application_name", broker="redis://localhost:6379/0")
 
 app.conf.imports = ("Tasks.reminder_tasks",)
+app.conf.timezone = "Asia/Tehran"
+app.conf.enable_utc = True
+
 
 @app.task
 def say_hello():
